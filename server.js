@@ -1,20 +1,12 @@
 var express = require('express'),
+	bodyParser = require('body-parser'),
 	app = express(),
 	PORT = process.env.PORT || 3000;
 
-var todos = [{
-	id: 1,
-	description: 'Video tango class',
-	completed: false
-}, {
-	id: 2,
-	description: 'Edit tango videos',
-	completed: false
-}, {
-	id: 3,
-	description: 'Transfer Phil\'s domain name',
-	completed: true
-}];
+var todos = [],
+	todoNextId = 1;
+
+	app.use(bodyParser.json());
 
 	app.get('/', function (req, res) {
 		res.send('Todo API Root');
@@ -42,6 +34,24 @@ var todos = [{
 			res.status(404).send();
 		}
 	});
+
+
+	// POST /todos
+	app.post('/todos', function (req, res) {
+		var body = req.body;
+
+		// add Id field
+		body.id = todoNextId;
+		// push body into array
+		todos.push(body);
+		todoNextId++;
+		console.log('todoNextId: ' + todoNextId);
+		
+
+		res.json(body);
+	});
+
+
 
 	app.listen(PORT, function () {
 		console.log('Express listening on port: ' + PORT + '!');
