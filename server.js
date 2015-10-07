@@ -7,52 +7,69 @@ var express = require('express'),
 var todos = [],
 	todoNextId = 1;
 
-	app.use(bodyParser.json());
+app.use(bodyParser.json());
 
-	app.get('/', function (req, res) {
-		res.send('Todo API Root');
-	});
+app.get('/', function (req, res) {
+	res.send('Todo API Root');
+});
 
-	// GET /todos
-	app.get('/todos', function (req, res) {
-		res.json(todos);
-	});
+// GET /todos
+app.get('/todos', function (req, res) {
+	res.json(todos);
+});
 
-	// GET /todos/:id
-	app.get('/todos/:id', function (req, res) {
-		var todoId = parseInt(req.params.id, 10),
-			matchedTodo = _.findWhere(todos, {id: todoId});
+// GET /todos/:id
+app.get('/todos/:id', function (req, res) {
+	var todoId = parseInt(req.params.id, 10),
+		matchedTodo = _.findWhere(todos, {id: todoId});
 
-		if (matchedTodo) {
-			res.json(matchedTodo);
-		} else {
-			res.status(404).send();
-		}
-	});
+	if (matchedTodo) {
+		res.json(matchedTodo);
+	} else {
+		res.status(404).send();
+	}
+});
 
 
-	// POST /todos
-	app.post('/todos', function (req, res) {
-		var body = _.pick(req.body, 'description', 'completed');
+// POST /todos
+app.post('/todos', function (req, res) {
+	var body = _.pick(req.body, 'description', 'completed');
 
-		if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-			return res.status(400).send();
-		}
+	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+		return res.status(400).send();
+	}
+	
+	body.id = todoNextId;
+	todoNextId++;
+
+	body.description = body.description.trim();
+
+	todos.push(body);
+
+	res.json(body);
+});
+
+// DELETE /todos/:id
+app.delete('/todos/:id', function (req, res) {
+	var todoId = parseInt(req.params.id, 10),
+		matchedTodo = _.findWhere(todos, {id: todoId});
+
+
+	if (matchedTodo) {
+		todos = _.without(todos, matchedTodo);
+		res.json(matchedTodo);
+
+	} else {
+		res.status(404).json({"error": "Id not found!"});
+	}
+
+
 		
-		body.id = todoNextId;
-		todoNextId++;
 
-		body.description = body.description.trim();
+	
 
-		todos.push(body);
-		
-		
+});
 
-		res.json(body);
-	});
-
-
-
-	app.listen(PORT, function () {
-		console.log('Express listening on port: ' + PORT + '!');
-	});
+app.listen(PORT, function () {
+	console.log('Express listening on port: ' + PORT + '!');
+});
